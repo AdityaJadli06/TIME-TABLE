@@ -12,18 +12,25 @@ function generateTimetable() {
     let numSections = parseInt(document.getElementById("numSections").value);
     let sectionRange = document.getElementById("sectionRange").value.toUpperCase().split("-");
     let numSubjects = parseInt(document.getElementById("numSubjects").value);
+    let numLabs = parseInt(document.getElementById("numLabs").value);
     let minClassesPerDay = parseInt(document.getElementById("minClassesPerDay").value);
 
     let morningStart = convertToMinutes(document.getElementById("morningStart").value);
-    let morningEnd = convertToMinutes(document.getElementById("morningEnd").value);
     let eveningStart = convertToMinutes(document.getElementById("eveningStart").value);
-    let eveningEnd = convertToMinutes(document.getElementById("eveningEnd").value);
+    let breakStart = convertToMinutes(document.getElementById("breakStart").value);
+    let breakEnd = convertToMinutes(document.getElementById("breakEnd").value);
     let classDuration = parseInt(document.getElementById("classDuration").value);
+    let labDuration = parseInt(document.getElementById("labDuration").value);
     let gapBetweenClasses = parseInt(document.getElementById("gapBetweenClasses").value);
 
     let subjects = [];
     for (let i = 1; i <= numSubjects; i++) {
         subjects.push(`Subject ${i}`);
+    }
+
+    let labs = [];
+    for (let i = 1; i <= numLabs; i++) {
+        labs.push(`Lab ${i}`);
     }
 
     let sections = [];
@@ -39,38 +46,90 @@ function generateTimetable() {
     let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     let holidays = Array.from(document.querySelectorAll('input[name="holiday"]:checked')).map(cb => cb.value);
 
-    let assignedBatches = {}; 
+    let assignedBatches = {};
     let toggleBatch = true;
 
     sections.forEach(section => {
         assignedBatches[section] = toggleBatch ? "Morning" : "Evening";
-        toggleBatch = !toggleBatch; 
+        toggleBatch = !toggleBatch;
     });
 
     let subjectTracker = {};
+    let labTracker = {};
+    let labAssignmentCount = {};
+    let sectionLabCount = {}; // Tracks the number of labs assigned to each section
+    let lastLabDay = {}; // Tracks the last day a lab was assigned to a section
+    let totalLabsAssigned = 0; // Tracks the total number of labs assigned
+    const totalLabsNeeded = sections.length * numLabs; // Total labs required across all sections
+    sections.forEach(section => sectionLabCount[section] = 0);
+    labs.forEach(lab => labAssignmentCount[lab] = 0);
 
     days.forEach(day => {
         if (!holidays.includes(day)) {
             sections.forEach(section => {
                 let batch = assignedBatches[section];
                 let startTime = batch === "Morning" ? morningStart : eveningStart;
-                let endTime = batch === "Morning" ? morningEnd : eveningEnd;
                 let time = startTime;
 
-                if (!subjectTracker[day]) subjectTracker[day] = [];
+                if (!labTracker[day]) labTracker[day] = [];
+
+                let subjectTrackerForSection = []; // Track subjects for the section on this day
 
                 for (let i = 0; i < minClassesPerDay; i++) {
-                    if (time + classDuration > endTime) break;
+                    if (time >= breakStart && time < breakEnd) {
+                        time = breakEnd; // Skip the break period
+                    }
 
-                    let availableSubjects = subjects.filter(sub => !subjectTracker[day].includes(sub));
+                    if (time >= startTime + 8 * 60) break; // Ensure no classes after 8 hours from start
 
-                    if (availableSubjects.length === 0) subjectTracker[day] = [];
+                    // Randomly decide whether to schedule a lab or a subject
+                    let isLab = Math.random() < 0.5 && sectionLabCount[section] < numLabs && totalLabsAssigned < totalLabsNeeded;
+
+                    if (isLab) {
+                        let lab;
+
+                        let availableLabs = labs.filter(l => 
+                            !labTracker[day].includes(l) && 
+                            labAssignmentCount[l] < Math.ceil(totalLabsNeeded / labs.length) && // Distribute labs evenly
+                            (!lastLabDay[section] || lastLabDay[section] !== day) // Avoid consecutive days
+                        );
+
+                        if (availableLabs.length > 0) {
+                            lab = availableLabs[Math.floor(Math.random() * availableLabs.length)];
+                        }
+
+                        if (lab) {
+                            labTracker[day].push(lab);
+                            labAssignmentCount[lab]++;
+                            sectionLabCount[section]++;
+                            lastLabDay[section] = day; // Update the last lab day for the section
+                            totalLabsAssigned++; // Increment total labs assigned
+
+                            let timeSlot = `${formatTime(time)} - ${formatTime(time + labDuration)}`;
+                            timetable.push({
+                                section: section,
+                                batch: batch,
+                                day: day,
+                                timeSlot: timeSlot,
+                                subject: lab
+                            });
+
+                            time += labDuration + gapBetweenClasses;
+                            continue;
+                        }
+                    }
+
+                    let availableSubjects = subjects.filter(sub => 
+                        !subjectTrackerForSection.includes(sub) // Avoid repeating subjects for the section on the same day
+                    );
+                    if (availableSubjects.length === 0) subjectTrackerForSection = [];
 
                     let subject = availableSubjects[Math.floor(Math.random() * availableSubjects.length)];
-                    subjectTracker[day].push(subject);
+                    if (!subject) subject = subjects[Math.floor(Math.random() * subjects.length)]; // Fallback if no available subject
+
+                    subjectTrackerForSection.push(subject);
 
                     let timeSlot = `${formatTime(time)} - ${formatTime(time + classDuration)}`;
-
                     timetable.push({
                         section: section,
                         batch: batch,
