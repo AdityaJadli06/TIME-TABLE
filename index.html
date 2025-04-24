@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="container">
         <h1>Timetable Generator</h1>
 
@@ -23,6 +22,15 @@
 
             <label>Number of Labs:</label>
             <input type="number" id="numLabs" required placeholder="Enter number of labs">
+
+            <label>Groups per Section:</label>
+            <select id="groupsPerSection" required>
+                <option value="1">No Groups (Whole Section)</option>
+                <option value="2" selected>2 Groups (G1 & G2)</option>
+            </select>
+
+            <label>Combined Labs (comma separated):</label>
+            <input type="text" id="combinedLabs" placeholder="e.g., Lab 1,Lab 3 (leave empty if none)">
 
             <label>Minimum Classes per Day:</label>
             <input type="number" id="minClassesPerDay" required placeholder="Enter min classes per day">
@@ -64,6 +72,11 @@
 
         <div id="timetableResult" class="hidden">
             <h2>Generated Timetable:</h2>
+            <div class="week-toggle">
+                <button id="prevWeek">← Previous Week</button>
+                <span id="weekIndicator">Week 1 (G1 Labs)</span>
+                <button id="nextWeek">Next Week →</button>
+            </div>
             <div class="table-container">
                 <table>
                     <thead>
@@ -72,13 +85,28 @@
                             <th>Batch</th>
                             <th>Day</th>
                             <th>Time Slot</th>
-                            <th>Subject</th>
+                            <th>Subject/Lab</th>
+                            <th>Type</th>
                         </tr>
                     </thead>
                     <tbody id="timetableBody"></tbody>
                 </table>
             </div>
         </div>
+    </div>
+
+    <div id="subjectNamesContainer" class="hidden">
+        <h3>Enter Subject Names</h3>
+        <div id="subjectInputs"></div>
+    </div>
+    
+    <div id="labNamesContainer" class="hidden">
+        <h3>Enter Lab Names</h3>
+        <div id="labInputs"></div>
+    </div>
+    
+    <div class="button-group">
+        <button id="exportCSV" class="hidden">Export as CSV</button>
     </div>
 
     <script src="script.js"></script>
