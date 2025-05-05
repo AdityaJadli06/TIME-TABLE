@@ -15,6 +15,7 @@ document.getElementById("resetButton").addEventListener("click", function () {
     currentWeek = 1;
 });
 
+<<<<<<< HEAD
 document.getElementById("prevWeek").addEventListener("click", function() {
     if (currentWeek > 1) {
         currentWeek--;
@@ -28,6 +29,8 @@ document.getElementById("nextWeek").addEventListener("click", function() {
     updateWeekDisplay();
     filterTimetableByWeek();
 });
+=======
+>>>>>>> 6438b86 (Your commit message)
 
 document.getElementById("numSubjects").addEventListener("change", setupSubjectInputs);
 document.getElementById("numLabs").addEventListener("change", setupSubjectInputs);
@@ -59,6 +62,34 @@ function generateTimetable() {
     const labDuration = parseInt(document.getElementById("labDuration").value);
     const gapBetweenClasses = parseInt(document.getElementById("gapBetweenClasses").value);
 
+<<<<<<< HEAD
+=======
+    if (isNaN(numSections) || numSections <= 0) {
+        console.error("Invalid number of sections.");
+        return;
+    }
+
+    if (sectionRange.length !== 2 || sectionRange[0].length !== 1 || sectionRange[1].length !== 1) {
+        console.error("Invalid section range. Please use the format A-D.");
+        return;
+    }
+
+    if (isNaN(numSubjects) || numSubjects <= 0) {
+        console.error("Invalid number of subjects.");
+        return;
+    }
+
+    if (isNaN(numLabs) || numLabs <= 0) {
+        console.error("Invalid number of labs.");
+        return;
+    }
+
+    if (isNaN(morningStart) || isNaN(eveningStart) || isNaN(breakStart) || isNaN(breakEnd)) {
+        console.error("Invalid time inputs.");
+        return;
+    }
+
+>>>>>>> 6438b86 (Your commit message)
     // Generate sections
     let sections = [];
     if (sectionRange.length === 2) {
@@ -82,6 +113,28 @@ function generateTimetable() {
         labs.push(labInput ? labInput.value || `Lab ${i}` : `Lab ${i}`);
     }
 
+<<<<<<< HEAD
+=======
+    if (!labs || labs.length === 0) {
+        console.error("Labs are not initialized properly.");
+        return;
+    }
+
+    if (!sections || sections.length === 0) {
+        console.error("Sections are not initialized properly.");
+        return;
+    }
+
+    if (!subjects || subjects.length === 0) {
+        console.error("Subjects are not initialized properly.");
+        return;
+    }
+
+    console.log("Labs:", labs);
+    console.log("Sections:", sections);
+    console.log("Subjects:", subjects);
+
+>>>>>>> 6438b86 (Your commit message)
     // Initialize tracking objects
     let timetable = [];
     let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -94,18 +147,35 @@ function generateTimetable() {
         toggleBatch = !toggleBatch;
     });
 
+<<<<<<< HEAD
     let labTracker = {};
     let labAssignmentCount = {};
     let sectionLabCount = {};
     let totalLabsAssigned = 0;
     const totalLabsNeeded = sections.length * numLabs;
     sections.forEach(section => sectionLabCount[section] = 0);
+=======
+    let labTracker = {}; // Tracks labs assigned per day
+    let labAssignmentCount = {}; // Tracks how many times each lab is assigned
+    let sectionGroupLabCount = {}; // Tracks how many labs each group in a section has been assigned
+    let totalLabsAssigned = 0;
+    const totalLabsNeeded = sections.length * groupsPerSection * numLabs;
+
+    // Initialize lab count for each group in each section
+    sections.forEach(section => {
+        sectionGroupLabCount[section] = {};
+        for (let group = 1; group <= groupsPerSection; group++) {
+            sectionGroupLabCount[section][group] = 0;
+        }
+    });
+>>>>>>> 6438b86 (Your commit message)
     labs.forEach(lab => labAssignmentCount[lab] = 0);
 
     // Generate timetable
     days.forEach(day => {
         if (!holidays.includes(day)) {
             sections.forEach(section => {
+<<<<<<< HEAD
                 let batch = assignedBatches[section];
                 let startTime = batch === "Morning" ? morningStart : eveningStart;
                 let time = startTime;
@@ -188,6 +258,138 @@ function generateTimetable() {
                     });
 
                     time += classDuration + gapBetweenClasses;
+=======
+                for (let group = 1; group <= groupsPerSection; group++) {
+                    let batch = assignedBatches[section];
+                    let startTime = batch === "Morning" ? morningStart : eveningStart;
+                    let time = startTime;
+                    let subjectTrackerForGroup = [];
+
+                    for (let i = 0; i < minClassesPerDay; i++) {
+                        if (time >= breakStart && time < breakEnd) {
+                            time = breakEnd;
+                        }
+
+                        if (time >= startTime + 8 * 60) break; // Prevents infinite loops
+
+                        // Decide whether to schedule a lab
+                        let isLab = Math.random() < 0.5 && // Increase probability
+                            sectionGroupLabCount[section][group] < numLabs &&
+                            totalLabsAssigned < totalLabsNeeded;
+
+                        if (isLab) {
+                            let combinedLab = null;
+
+                            // Check for combined labs first
+                            combinedLab = labs.find(l =>
+                                combinedLabs.includes(l) &&
+                                !labTracker[day]?.includes(l) &&
+                                labAssignmentCount[l] < Math.ceil(totalLabsNeeded / labs.length)
+                            );
+
+                            if (combinedLab) {
+                                console.log("Assigning combined lab:", combinedLab);
+                                labTracker[day] = labTracker[day] || [];
+                                labTracker[day].push(combinedLab);
+                                labAssignmentCount[combinedLab]++;
+                                sections.forEach(sec => {
+                                    for (let grp = 1; grp <= groupsPerSection; grp++) {
+                                        sectionGroupLabCount[sec][grp]++;
+                                    }
+                                });
+                                totalLabsAssigned += sections.length * groupsPerSection;
+
+                                let timeSlot = `${formatTime(time)} - ${formatTime(time + labDuration)}`;
+                                sections.forEach(sec => {
+                                    for (let grp = 1; grp <= groupsPerSection; grp++) {
+                                        timetable.push({
+                                            section: sec,
+                                            group: grp,
+                                            batch: assignedBatches[sec],
+                                            day: day,
+                                            timeSlot: timeSlot,
+                                            subject: combinedLab,
+                                            isLab: true,
+                                            isCombinedLab: true,
+                                            type: "Combined Lab"
+                                        });
+                                    }
+                                });
+
+                                time += labDuration + gapBetweenClasses;
+                                continue;
+                            }
+
+                            // Assign separate labs for the current group if no combined lab is available
+                            let availableLabs = labs.filter(l =>
+                                !labTracker[day]?.includes(l) &&
+                                labAssignmentCount[l] < Math.ceil(totalLabsNeeded / labs.length)
+                            );
+
+                            if (availableLabs.length > 0) {
+                                let lab = availableLabs[0];
+
+                                labTracker[day] = labTracker[day] || [];
+                                labTracker[day].push(lab);
+                                labAssignmentCount[lab]++;
+                                sectionGroupLabCount[section][group]++;
+                                totalLabsAssigned++;
+
+                                console.log("Section:", section, "Group:", group, "Lab Count:", sectionGroupLabCount[section][group]);
+                                console.log("Total Labs Assigned:", totalLabsAssigned, "Total Labs Needed:", totalLabsNeeded);
+                                console.log("Available Labs:", availableLabs);
+                                console.log("Combined Labs:", combinedLabs);
+                                console.log("Lab Tracker for Day:", day, labTracker[day]);
+
+                                console.log("Generating timetable for section:", section, "group:", group);
+                                console.log("Day:", day, "Time:", time, "Lab:", lab, "Subject:", subject);
+
+                                let timeSlot = `${formatTime(time)} - ${formatTime(time + labDuration)}`;
+                                timetable.push({
+                                    section: section,
+                                    group: group,
+                                    batch: batch,
+                                    day: day,
+                                    timeSlot: timeSlot,
+                                    subject: lab,
+                                    isLab: true,
+                                    type: "Lab"
+                                });
+
+                                time += labDuration + gapBetweenClasses;
+                                continue;
+                            }
+                        }
+
+                        // Subject assignment
+                        let availableSubjects = subjects.filter(sub =>
+                            !subjectTrackerForGroup.includes(sub)
+                        );
+                        if (availableSubjects.length === 0) subjectTrackerForGroup = [];
+
+                        let subject = availableSubjects[Math.floor(Math.random() * availableSubjects.length)] ||
+                            subjects[Math.floor(Math.random() * subjects.length)];
+
+                        subjectTrackerForGroup.push(subject);
+
+                        console.log("Generating timetable for section:", section, "group:", group);
+                        console.log("Day:", day, "Time:", time, "Lab:", lab, "Subject:", subject);
+
+                        let timeSlot = `${formatTime(time)} - ${formatTime(time + classDuration)}`;
+                        timetable.push({
+                            section: section,
+                            group: group,
+                            batch: batch,
+                            day: day,
+                            timeSlot: timeSlot,
+                            subject: subject,
+                            isLab: false,
+                            type: "Lecture"
+                        });
+
+                        time += classDuration + gapBetweenClasses;
+                    }
+>>>>>>> 6438b86 (Your commit message)
                 }
             });
         }
@@ -200,6 +402,7 @@ function generateTimetable() {
 }
 
 function filterTimetableByWeek() {
+<<<<<<< HEAD
     const groupsPerSection = parseInt(document.getElementById("groupsPerSection").value);
     const filteredTimetable = generatedTimetable.filter(entry => {
         // Always show combined labs and regular subjects
@@ -218,6 +421,21 @@ function filterTimetableByWeek() {
 
 function displayTimetable(timetable) {
     let timetableBody = document.getElementById("timetableBody");
+=======
+    // Display the full timetable without filtering
+    displayTimetable(generatedTimetable);
+}
+
+function displayTimetable(timetable) {
+    const timetableBody = document.getElementById("timetableBody");
+    if (!timetableBody) {
+        console.error("Timetable body element not found.");
+        return;
+    }
+
+    console.log("Generated Timetable:", timetable);
+    
+>>>>>>> 6438b86 (Your commit message)
     timetableBody.innerHTML = "";
 
     timetable.forEach(entry => {
@@ -277,6 +495,7 @@ function setupSubjectInputs() {
 
 function updateWeekDisplay() {
     const weekIndicator = document.getElementById("weekIndicator");
+<<<<<<< HEAD
     const groupsPerSection = parseInt(document.getElementById("groupsPerSection").value);
     
     if (groupsPerSection === 2) {
@@ -284,6 +503,10 @@ function updateWeekDisplay() {
         weekIndicator.textContent = `Week ${currentWeek} (${group} Labs)`;
     } else {
         weekIndicator.textContent = `Week ${currentWeek}`;
+=======
+    if (weekIndicator) {
+        weekIndicator.textContent = "Full Timetable"; // Static message
+>>>>>>> 6438b86 (Your commit message)
     }
 }
 
@@ -329,4 +552,8 @@ function exportAsCSV() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 6438b86 (Your commit message)
