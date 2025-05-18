@@ -9,11 +9,7 @@
 <body>
     <div class="container">
         <h1>Timetable Generator</h1>
-
         <form id="timetableForm">
-            <label>Number of Sections:</label>
-            <input type="number" id="numSections" required placeholder="Enter number of sections">
-
             <label>Section Range (e.g., A-D):</label>
             <input type="text" id="sectionRange" required placeholder="A-D">
 
@@ -23,63 +19,56 @@
             <label>Number of Labs:</label>
             <input type="number" id="numLabs" required placeholder="Enter number of labs">
 
-            <label>Groups per Section:</label>
-            <select id="groupsPerSection" required>
-                <option value="1">No Groups (Whole Section)</option>
-                <option value="2" selected>2 Groups (G1 & G2)</option>
+            <label>Groups Per Section:</label>
+            <select id="groupsPerSection">
+                <option value="1">1</option>
+                <option value="2">2</option>
             </select>
 
             <label>Combined Labs (comma separated):</label>
-            <input type="text" id="combinedLabs" placeholder="e.g., Lab 1,Lab 3 (leave empty if none)">
+            <input type="text" id="combinedLabs" placeholder="Lab 1, Lab 2">
 
-            <label>Minimum Classes per Day:</label>
-            <input type="number" id="minClassesPerDay" required placeholder="Enter min classes per day">
+            <label>Minimum Classes Per Day:</label>
+            <input type="number" id="minClassesPerDay" value="4" required>
 
-            <label>Morning Batch Start Time:</label>
-            <input type="time" id="morningStart" required>
+            <label>Morning Start Time:</label>
+            <input type="time" id="morningStart" value="08:00" required>
 
-            <label>Evening Batch Start Time:</label>
-            <input type="time" id="eveningStart" required>
+            <label>Evening Start Time:</label>
+            <input type="time" id="eveningStart" value="13:00" required>
 
             <label>Break Start Time:</label>
-            <input type="time" id="breakStart" required>
+            <input type="time" id="breakStart" value="12:00" required>
 
             <label>Break End Time:</label>
-            <input type="time" id="breakEnd" required>
+            <input type="time" id="breakEnd" value="13:00" required>
 
-            <label>Class Duration (Minutes):</label>
-            <input type="number" id="classDuration" required placeholder="50">
+            <label>Class Duration (minutes):</label>
+            <input type="number" id="classDuration" value="60" required>
 
-            <label>Lab Duration (Minutes):</label>
-            <input type="number" id="labDuration" required placeholder="120">
+            <label>Lab Duration (minutes):</label>
+            <input type="number" id="labDuration" value="120" required>
 
-            <label>Gap Between Classes (Minutes):</label>
-            <input type="number" id="gapBetweenClasses" required placeholder="10">
+            <label>Gap Between Classes (minutes):</label>
+            <input type="number" id="gapBetweenClasses" value="10" required>
 
-            <label>Select Holidays:</label>
+            <label>College End Time:</label>
+            <input type="time" id="collegeEnd" value="17:00" required>
+
+            <label>Maximum Labs Per Day:</label>
+            <input type="number" id="maxLabsPerDay" value="2" min="1" max="10" required>
+
             <div class="holiday-checkboxes">
-                <label><input type="checkbox" name="holiday" value="Monday"> Monday</label>
-                <label><input type="checkbox" name="holiday" value="Tuesday"> Tuesday</label>
-                <label><input type="checkbox" name="holiday" value="Wednesday"> Wednesday</label>
-                <label><input type="checkbox" name="holiday" value="Thursday"> Thursday</label>
-                <label><input type="checkbox" name="holiday" value="Friday"> Friday</label>
+                <label>Holidays:</label>
+                <label><input type="checkbox" name="holiday" value="Sunday"> Sunday</label>
                 <label><input type="checkbox" name="holiday" value="Saturday"> Saturday</label>
             </div>
 
             <button type="submit">Generate Timetable</button>
-            <button type="reset" id="resetButton">Reset</button>
+            <button type="button" id="resetButton">Reset</button>
         </form>
 
         <div id="timetableResult" class="hidden">
-            <h2>Generated Timetable:</h2>
-<<<<<<< HEAD
-            <div class="week-toggle">
-                <button id="prevWeek">← Previous Week</button>
-                <span id="weekIndicator">Week 1 (G1 Labs)</span>
-                <button id="nextWeek">Next Week →</button>
-            </div>
-=======
->>>>>>> 6438b86 (Your commit message)
             <div class="table-container">
                 <table>
                     <thead>
@@ -96,10 +85,7 @@
                 </table>
             </div>
         </div>
-<<<<<<< HEAD
     </div>
-=======
->>>>>>> 6438b86 (Your commit message)
 
     <div id="subjectNamesContainer" class="hidden">
         <h3>Enter Subject Names</h3>
